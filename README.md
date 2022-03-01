@@ -230,7 +230,119 @@ As you can see, we made Image tag more dynamic by STRING interpolaton
 
           h "docker build . -t sharksdocker/nodeapp:${DOCKER_TAG}"
                        
-                       
+   -  Configure Jenkins GUI:'
+
+               Mange Jenkins > Manage Credenttials > Jenkins Global Credentials
+               Add Credentials > username with pwd (For Dockr hub)
+               OK
+  
+<br />
+
+**WEBHOOKS**
+
+Whenever we push, we want to run Jenkins file automatically. For that we use **WebHooks** on GitHub.
+
+Basically, when specified event happens, we'll send POST request to each URL provided because everything is Event Based.
+
+Whenever we push, we want to have Automaticc Trigger!
+
+Simply add PayLoad URL which is Jenkins URL to below directory on Github
+
+               Webhooks > Add Webhook > Payload URL
+               
+               Payload URL: http://localhost:8080/github-webhook
+               
+               Content Type: Application/json
+               
+               Select event that you would like to trigger.
+               
+Our Webhook is ready! We pushed our image to dockerhub.
+
+**We need to pull the image and create container**
+
+However, we will use Kubernetes for that. 
+
+Our K8S cluster is up and running. 
+
+               kubectl get nodes
+                   (There are two worker nodes)
+                   
+**Now, we are going to deploy our application to this K8S Cluster.**
+
+In order to do that:
+
+   -  First, we need to create our Deployment file.
+   -  Second, we need to create our Service file. 
+
+               nodeapp-deploy.yaml
+
+               apiVersion: apps/v1
+               kind: Deployment 
+               metadata:
+                 name: nodeapp 
+                 labels:
+                   app: nodeapp 
+               spec:
+                 replicas: 2
+                 selector:
+                   matchLabels: 
+                     app: nodeapp 
+                 template: 
+                   metadata: 
+                     labels:
+                       app: nodeapp 
+                   spec:
+                     containers: 
+                     - name: nodeapp 
+                       image: sharksdocker/nodeapp:tagVersion
+                       ports:
+                       - containerPort: 8080
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+               
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
