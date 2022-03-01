@@ -127,7 +127,36 @@ Build your **Jenkins File** to define your steps in CI/CD pipeline.
 **Running K8S with CI/CD**
 
 &nbsp; &nbsp; First, we plan CI/CD pipeline, and based on our plan we are going to build our code. After developing our code, we need to build the code.
-We build artifacts (archieve files), executable files  using maven.
+We build artifacts (archieve files), executable files  using maven. Then we test it, how our code works. If everything is successfull with testing, integration testing, load testing, stress testing, regression test then we **release** it.
+
+&nbsp; &nbsp; After release happens like release-1, release-2, release-3 then we deploy it. We deploy to the container and operate this code then monitor
+the applicatton
+
+
+**JENKINS PUTS ALL THE PIECES TOGETHER AND DO IT CONTINOUSLY. JENKINS IS A GLUE IN THE PROJECT**        
+
+   -  Verify if your Cluster is in good condition
+
+               K8S is an instance 
+               kubectl get nodes
+               
+   -  To create a container from **image**;    
+
+               docker run -d --name jenkins -p 8080:8080 jenkins/jenkins:latest
+               
+   -  To get admin pwd inside container 
+
+               docker exec -it jenkins /bin/bash       
+
+               localhost:8080 we put this on browser and start jenkins
+               
+               Then we unlock the jenkins.
+               
+               
+               
+               
+               
+               
 
 
 
