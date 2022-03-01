@@ -151,8 +151,45 @@ the applicatton
                localhost:8080 we put this on browser and start jenkins
                
                Then we unlock the jenkins.
+
+Our cluster is on Instance
+Jenkins is on local computer.
+
+   -  Here we used package.json and server.json.
+
+PACKAGE.JSON ---> This is a dependency for node.js application.
+
+   -  Go to Jenkins Dashboard and create pipeline.
+
+               Pipeline:
+                  Add GitHub URL
+                  
+               Branch:
+                  master
+               Script Path:
+                  jenkins file
+                  
+                  
+   -  APPLY AND SAVE 
+   -  BUILD NOW. 
+
+   -  Install docker into container (Jenkins machine)
+
+   - Go inside jenkins container
+
+               docker exec -it jenkins /bin/bash 
                
+**We need to run everything as a jenkins user, we can not run as a root.               
+
+
+
+
+
                
+
+
+
+
                
                
                
