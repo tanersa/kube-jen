@@ -179,7 +179,63 @@ PACKAGE.JSON ---> This is a dependency for node.js application.
 
                docker exec -it jenkins /bin/bash 
                
-**We need to run everything as a jenkins user, we can not run as a root.               
+**We need to run everything as a jenkins user, we can not run as a root.**   
+
+<br />
+
+So, lets install **docker inside docker container.**
+
+We install containers in Dockerfile
+
+We have steps for CI/CD pipeline in Jenkins file.
+
+   -  Install docker in docker machine
+   -  Install docker plugin in Jenkinns GUI.
+
+Let's create **more modular** image tag by assigning commit id of code change to image tag.
+
+This will help us to trouble shoot much easier in the future. Furthermore, we can segregate our resources.
+
+In order to do that we need to create some custom functions inside Jenkinsfile, so we can leverage functional programming.
+
+               pipeline {
+                   agent any 
+                   environment {
+                       DOCKER_TAG = getDockerTag()
+                       registry = "sharksdocker/nodeapp"
+                       registryCredential = "sharkshub"
+                   }
+                   stages {
+                       stage ('Build docker image') {
+                           steps {
+                               sh "docker build . -t sharksdocker/nodeapp:${DOCKER_TAG}"
+                           }
+                       }
+                       stage ('Push docker image') {
+                           steps {
+                               script {
+                                   docker.withRegistry('',registryCredential){
+                                   sh "docker push sharksdocker/nodeapp:${DOCKER_TAG}"
+                               }
+                           }
+                       }
+                       }    
+                       
+                def getDockerTag() {
+                      def tag = sh script: 'git rev-parse HEAD', returnStdout: true
+                      return tag
+                  }       
+
+As you can see, we made Image tag more dynamic by STRING interpolaton
+
+          h "docker build . -t sharksdocker/nodeapp:${DOCKER_TAG}"
+                       
+                       
+
+
+
+
+
 
 
 
