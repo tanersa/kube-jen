@@ -298,6 +298,33 @@ In order to do that:
                        ports:
                        - containerPort: 8080
 
+               ---
+               
+               kind: Service 
+               apiVersion: v1
+               metadata:
+                 name: nodeapp 
+               spec:
+                 selector:
+                   app: nodeapp 
+                 ports:
+                 - protocol: TCP 
+                   port: 80
+                   targetPort: 8080
+                 type: LoadBalancer
+                 
+                 
+                 
+                 
+                 
+                 
+                 
+                 
+                 
+                 
+                 
+                 
+                 
  
  
  
