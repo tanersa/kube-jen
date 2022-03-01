@@ -157,7 +157,7 @@ Jenkins is on local computer.
 
    -  Here we used package.json and server.json.
 
-PACKAGE.JSON ---> This is a dependency for node.js application.
+**PACKAGE.JSON** ---> This is a dependency for node.js application.
 
    -  Go to Jenkins Dashboard and create pipeline.
 
@@ -171,7 +171,7 @@ PACKAGE.JSON ---> This is a dependency for node.js application.
                   
                   
    -  APPLY AND SAVE 
-   -  BUILD NOW. 
+   -  BUILD NOW
 
    -  Install docker into container (Jenkins machine)
 
@@ -300,6 +300,8 @@ In order to do that:
 
                ---
                
+               nodeapp-service.yaml
+               
                kind: Service 
                apiVersion: v1
                metadata:
@@ -313,8 +315,102 @@ In order to do that:
                    targetPort: 8080
                  type: LoadBalancer
                  
+ <br />                
                  
-                 
+ Next, we need to make Jenkins file to talk to K8S Cluster. Therefore, we need to add some part of Athentication and Authorization. 
+ 
+ We add one more STAGE to our Jenkins file.
+ 
+               pipeline {
+                   agent any 
+                   environment {
+                       DOCKER_TAG = getDockerTag()
+                       registry = "sharksdocker/nodeapp"
+                       registryCredential = "sharkshub"
+                   }
+                   stages {
+                       stage ('Build docker image') {
+                           steps {
+                               sh "docker build . -t sharksdocker/nodeapp:${DOCKER_TAG}"
+                           }
+                       }
+                       stage ('Push docker image') {
+                           steps {
+                               script {
+                                   docker.withRegistry('',registryCredential){
+                                   sh "docker push sharksdocker/nodeapp:${DOCKER_TAG}"
+                               }
+                           }
+                       }
+                       }
+                       stage ('Deploy to EKS') {
+                           steps {
+                               sh "chmod +x changeTag.sh"
+                               sh "./changeTag.sh ${DOCKER_TAG}"   
+                           }    
+                       }
+
+                   }
+               }
+               def getDockerTag() {
+                   def tag = sh script: 'git rev-parse HEAD', returnStdout: true
+                   return tag
+               }
+ 
+**Let's do the sloution for how to login to Kubernetes Cluster and authorize K8s cluster.** 
+
+   -  First, install "SSH Agent Plugin" if not installed on Jenkins GUI. This plugin will help us to go to this K8S cluster and talk.
+   -  Add second Global Credentials beside docker hub as SSH Agent on Jenkins UI.
+   -  Install kubectl in ec2-user level.
+   -  Make it executable
+       
+              chmod +x ./kubectl
+              
+Go to Jenkins and find shell script for ssh agent from **Pipeline Syntax.**
+
+   -  Copy and paste the shell script in Jenkins file
+
+               sshagent(['eks-machine'])
+               
+Next, we need to copy **deployment** and **service** files to under **root** directory (EC2 machine)               
+   
+               sh "scp -o StrictHostKeyChecking=no nodeapp-service.yaml node-app.yaml ec2-user@3.22.98.102:/home/ec2-user"
+                script {
+                    try {
+                        sh "ssh ec2-user@3.22.98.102 kubectl apply -f ."
+                    }catch(error) {
+                        sh "ssh ec2-user@3.22.98.102 kubectl create -f ."
+                    }
+                    
+                    }
+                    
+Now, it should run automatically after changes are pushed to GitHub using WebHook.
+
+Another advantage of CI/CD pipeline is we can find **bugs as early as possible.**
+
+If needed to change the text on the web app, just update **server.js** file
+
+               'use strict';
+
+               const express = require('express');
+
+               // Constants
+               const PORT = 8080;
+               const HOST = '0.0.0.0';
+
+               // App
+               const app = express();
+               app.get('/', (req, res) => {
+                 res.send('<h1 style="color:green;">Have a nice weekend !!!!!</h1> \n');
+               });
+
+               app.listen(PORT, HOST);
+               console.log(`Running on http://${HOST}:${PORT}`);
+
+
+
+
+
                  
                  
                  
